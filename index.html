@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAMA Quiz Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(255, 204, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            border: 3px solid #FFCC00;
+        }
+
+        h1 {
+            color: #000000;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FFCC00 0%, #FFD700 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        #question-counter {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            font-size: 24px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .answer {
+            width: 100%;
+            margin: 15px 0;
+            padding: 18px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #000000;
+            color: #FFCC00;
+            border: 3px solid #FFCC00;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .answer:hover {
+            background-color: #FFCC00;
+            color: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.4);
+        }
+
+        .answer:active {
+            transform: translateY(0);
+        }
+
+        #score-container {
+            text-align: center;
+        }
+
+        #score-container h2 {
+            color: #000000;
+            margin-bottom: 20px;
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #FFCC00 0%, #FFD700 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            animation: scoreReveal 0.5s ease-out;
+        }
+
+        @keyframes scoreReveal {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .score-display p {
+            color: #000000;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        #final-score {
+            color: #000000;
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        #score-message {
+            color: #666;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+
+        .restart {
+            width: 100%;
+            padding: 18px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #000000;
+            color: #FFCC00;
+            border: 3px solid #FFCC00;
+            border-radius: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .restart:hover {
+            background-color: #FFCC00;
+            color: #000000;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            .answer {
+                font-size: 16px;
+                padding: 15px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ZAMA Quiz Challenge</h1>
+        <div id="progress-bar">
+            <div id="progress-fill"></div>
+        </div>
+        <p id="question-counter">Question 1/10</p>
+        
+        <div id="question-container">
+            <h2 id="question">Question</h2>
+            <button id="answer1" class="answer">Answer 1</button>
+            <button id="answer2" class="answer">Answer 2</button>
+        </div>
+        
+        <div id="score-container" style="display: none;">
+            <h2>Quiz Finished!</h2>
+            <div class="score-display">
+                <p>Your final ZAMA Score is:</p>
+                <h3 id="final-score">0 out of 100</h3>
+            </div>
+            <p id="score-message">Well done!</p>
+            <button id="restart-btn" class="restart">Play Again</button>
+        </div>
+    </div>
+
+    <!-- Konfeti Kütüphanesi -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <script>
+        const questions = [
+            {
+                question: "What encryption method is used in ZAMA?",
+                answers: ["Symmetric encryption", "End-to-end encryption"],
+                correct: 1
+            },
+            {
+                question: "What does FHE make possible?",
+                answers: ["Processing data without decryption", "Only storing data"],
+                correct: 0
+            },
+            {
+                question: "With FHE, what can be provided without accessing user data?",
+                answers: ["Services", "Full control"],
+                correct: 0
+            },
+            {
+                question: "Why is FHE resistant to quantum computers?",
+                answers: ["Post-quantum resistance", "Classical encryption"],
+                correct: 0
+            },
+            {
+                question: "What can be done with encrypted calculations without viewing data?",
+                answers: ["Verify", "Change"],
+                correct: 0
+            },
+            {
+                question: "What will most processes on the chain become?",
+                answers: ["Secret", "Public"],
+                correct: 0
+            },
+            {
+                question: "What will all payments remain in ZAMA?",
+                answers: ["Secret", "Public"],
+                correct: 0
+            },
+            {
+                question: "When guaranteed privacy, where will financial institutions turn?",
+                answers: ["Blockchain", "Traditional systems"],
+                correct: 0
+            },
+            {
+                question: "What will the state infrastructure do?",
+                answers: ["Move more on-chain", "Move less on-chain"],
+                correct: 0
+            },
+            {
+                question: "What is the basis of inter-institutional cooperation?",
+                answers: ["Secret data sharing", "Open data sharing"],
+                correct: 0
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        const questionElement = document.getElementById('question');
+        const answer1 = document.getElementById('answer1');
+        const answer2 = document.getElementById('answer2');
+        const scoreContainer = document.getElementById('score-container');
+        const finalScoreElement = document.getElementById('final-score');
+        const questionContainer = document.getElementById('question-container');
+        const questionCounter = document.getElementById('question-counter');
+        const progressFill = document.getElementById('progress-fill');
+        const scoreMessage = document.getElementById('score-message');
+        const restartBtn = document.getElementById('restart-btn');
+
+        function showQuestion() {
+            const q = questions[currentQuestion];
+            questionElement.innerText = q.question;
+            answer1.innerText = q.answers;
+            answer2.innerText = q.answers[1];
+            
+            questionCounter.innerText = `Question ${currentQuestion + 1}/${questions.length}`;
+            progressFill.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+        }
+
+        function celebrateWithConfetti() {
+            // ZAMA renklerinde konfeti (Sarı ve Siyah tonları)
+            const colors = ['#FFCC00', '#FFD700', '#FFA500', '#000000'];
+            
+            // İlk konfeti patlaması
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: colors
+            });
+
+            // Ekstra konfeti efekti
+            setTimeout(() => {
+                confetti({
+                    particleCount: 50,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: colors
+                });
+            }, 250);
+
+            setTimeout(() => {
+                confetti({
+                    particleCount: 50,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: colors
+                });
+            }, 400);
+        }
+
+        function showScore() {
+            questionContainer.style.display = 'none';
+            questionCounter.style.display = 'none';
+            finalScoreElement.innerText = `${score} out of 100`;
+            scoreContainer.style.display = 'block';
+            
+            // Konfeti patlatma
+            celebrateWithConfetti();
+            
+            if (score >= 80) {
+                scoreMessage.innerText = "Excellent! You're a ZAMA expert! 🎉";
+            } else if (score >= 60) {
+                scoreMessage.innerText = "Great job! You know ZAMA well! 👏";
+            } else if (score >= 40) {
+                scoreMessage.innerText = "Good effort! Keep learning about ZAMA! 💪";
+            } else {
+                scoreMessage.innerText = "Nice try! Learn more about ZAMA and try again! 📚";
+            }
+        }
+
+        function handleAnswer(index) {
+            if (index === questions[currentQuestion].correct) {
+                score += 10;
+            }
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showScore();
+            }
+        }
+
+        answer1.addEventListener('click', () => handleAnswer(0));
+        answer2.addEventListener('click', () => handleAnswer(1));
+
+        restartBtn.addEventListener('click', () => {
+            currentQuestion = 0;
+            score = 0;
+            scoreContainer.style.display = 'none';
+            questionContainer.style.display = 'block';
+            questionCounter.style.display = 'block';
+            showQuestion();
+        });
+
+        showQuestion();
+    </script>
+</body>
+</html>
